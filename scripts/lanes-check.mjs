@@ -17,7 +17,7 @@ for (const file of files)
   if (units.filter((u) => u === file).length !== 1)
     problems.push(file + ': expected exactly one regression unit');
 for (const unit of units) if (!files.includes(unit)) problems.push(unit + ': missing UI spec');
-const aeWorkflow = readFileSync('.github/workflows/automationexercise-regression.yml', 'utf8');
+const aeWorkflow = readFileSync('.github/workflows/_automationexercise-regression.yml', 'utf8');
 const aeUnits = (aeWorkflow.match(/^\s*AE_UI_UNITS:\s*'([^']+)'/m)?.[1] ?? '')
   .split(',')
   .filter(Boolean);

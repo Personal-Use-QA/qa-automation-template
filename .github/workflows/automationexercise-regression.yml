@@ -13,72 +13,12 @@ permissions:
 concurrency:
   group: automationexercise-regression
   cancel-in-progress: false
-env:
-  # Each UI screen is listed once; lanes:check verifies this contract.
-  AE_UI_UNITS: 'catalog,cart,home,account,contact,checkout'
-  AE_SAFE_GREP: '^(?!.*@journey)(?!.*@logout-revokes)(?!.*@sqli)(?!.*@xss)'
 jobs:
   regression:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    outputs:
-      pages_ready: ${{ steps.public_report.outputs.ready }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 'lts/*'
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
-      - run: npm run tags:check -- --config=playwright.automationexercise.config.ts
-      - run: npm run lanes:check
-      - run: npm run findings:check
-      - name: Check Controls changes against the previous revision
-        run: |
-          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-            base_revision=$(git rev-parse HEAD^)
-          else
-            base_revision=$(git hash-object -t tree -w --stdin < /dev/null)
-          fi
-          npm run docs:check -- "$base_revision"
-      - run: node --test scripts/automationexercise-report.test.mjs
-      - run: npx playwright install --with-deps chromium
-      - name: Record expected daily cases
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results/automationexercise-discovery.json
-        run: npx playwright test --config=playwright.automationexercise.config.ts --project=ae-chromium --project=ae-api --grep "$AE_SAFE_GREP" --list --reporter=json
-      - name: Run daily regression
-        timeout-minutes: 30
-        run: npx playwright test --config=playwright.automationexercise.config.ts --project=ae-chromium --project=ae-api --grep "$AE_SAFE_GREP" --retries=0 --global-timeout=1500000
-      - name: Reject missing, skipped, flaky or failed cases
-        if: ${{ !cancelled() }}
-        run: node scripts/automationexercise-report.mjs --check
-      - name: Build public results summary
-        id: public_report
-        if: ${{ !cancelled() }}
-        run: |
-          node scripts/automationexercise-report.mjs --publish
-          echo "ready=true" >> "$GITHUB_OUTPUT"
-      - name: Preserve full evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: automationexercise-regression-${{ github.run_id }}-${{ github.run_attempt }}
-          retention-days: 14
-          path: |
-            playwright-report/automationexercise/
-            results/automationexercise*.json
-            test-results/automationexercise/
-      - name: Upload public summary
-        if: ${{ !cancelled() && steps.public_report.outputs.ready == 'true' }}
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: public/automationexercise
+    uses: ./.github/workflows/_automationexercise-regression.yml
+    with:
+      run_label: daily
+      publish_report: true
   pages:
     needs: regression
     if: ${{ !cancelled() && needs.regression.outputs.pages_ready == 'true' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}

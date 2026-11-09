@@ -66,7 +66,7 @@ for (const tag of HELD_OUT_TAGS)
     'regression.yml',
     'regression-firefox.yml',
     'regression-webkit.yml',
-    'automationexercise-regression.yml',
+    '_automationexercise-regression.yml',
   ]) {
     const text = readFileSync('.github/workflows/' + file, 'utf8');
     if (!text.includes('(?!.*' + tag + ')'))
