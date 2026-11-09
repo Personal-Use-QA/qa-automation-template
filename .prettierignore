@@ -1,0 +1,10 @@
+node_modules/
+.tools/
+playwright-report/
+test-results*/
+results/
+reports/
+public/
+package-lock.json
+docs/agent/memory/
+.env

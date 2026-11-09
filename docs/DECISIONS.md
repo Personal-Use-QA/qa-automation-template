@@ -1,0 +1,14 @@
+# Decisions
+
+- 2026-11-08: The user's latest direction makes this a Codex-only template. Canonical, tracked skills now live directly in .agents/skills/. Four role skills and three discipline skills make the QA workflow self-contained. No command wrappers, marketplace setup, lifecycle-hook installation, compatibility entrypoints or external skill packages are required.
+- 2026-11-08: Root and nested AGENTS.md provide project policy. The four roles run sequentially with handoffs unless delegation is authorized. Standing instructions, Codex MCP disabled_tools and the docs:check CI gate enforce the former integration responsibilities.
+- 2026-11-08: .codex/config.toml is the only MCP configuration. Bootstrap customizes values in place and validates native skill presence; it does not install or duplicate skills.
+- 2026-11-08: Removed obsolete plugin placeholders and optional statusline tooling. New docs/agent/skills.md and enforcement.md explain the native skill workflow. The optional connector catalog contains 18 integrations with Codex authorization guidance.
+- 2026-11-08: The reference checkout is unavailable. Rules and memory seeds are reconstructed from the supplied scaffold brief, not claimed as extracted verbatim. Reference diff verification remains unavailable, so no final commit is made.
+- 2026-11-08: Existing main repository was reinitialized with git init -b main; no history rewritten. The existing .gitattributes enforces LF for portable shell execution.
+- 2026-11-08: Host PATH lacks standard Node/npm/Bash/Git. Existing bundled tools and ignored .tools/ shims/cache support verification without global toolchain changes. Host Node is 24; CI remains on Node 20 and the declared engine permits >=20.
+- 2026-11-08: All dependency versions are the exact requested pins. Initial install reported seven moderate advisories and an upstream unsupported-eslint warning; no unrequested breaking upgrades were applied.
+- 2026-11-08: Verification-only yaml 2.6.1 and smol-toml 1.3.1 live under ignored .tools/verify. No runtime dependencies were added. JSON cannot contain WHY comments, so rationale is documented here.
+- 2026-11-08: Reusable \_ui-unit.yml avoids copied regression jobs. scripts/bootstrap.mjs provides portable non-evaluating customization. scripts/doc-sync-check.mjs checks Controls updates both locally and in CI.
+- 2026-11-08: Starter recon caps, severity examples and the forbidden table are conservative defaults because the originals are unavailable. The optional brand reference license was not recreated; its LICENSE is a provenance/absence notice.
+- 2026-11-08: Bootstrap never reads or overwrites an existing .env. GitHub expression delimiters are preserved while uppercase template tokens are replaced. Source validation excludes ignored dependencies, local tooling and generated outputs.

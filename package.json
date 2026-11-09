@@ -1,0 +1,41 @@
+{
+  "name": "qa-automation-template",
+  "private": true,
+  "description": "{{PROJECT_NAME}} / {{REPO_SLUG}} automation template",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --project=ui-chromium --project=ui-firefox --project=ui-webkit",
+    "test:api": "playwright test --project=api",
+    "test:ae": "playwright test --config=playwright.automationexercise.config.ts",
+    "test:mobile": "playwright test --project=mobile-chromium --project=mobile-webkit --project=tablet-chromium --project=tablet-webkit",
+    "test:sanity": "playwright test --grep @sanity --project=ui-chromium --project=api",
+    "test:ci": "playwright test --reporter=html,github",
+    "list": "playwright test --list",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "lanes:check": "node scripts/lanes-check.mjs",
+    "tags:check": "node scripts/tag-check.mjs",
+    "findings:check": "node scripts/findings-check.mjs",
+    "sanity:gate": "node scripts/sanity-gate.mjs",
+    "report": "playwright show-report",
+    "docs:check": "node scripts/doc-sync-check.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "20.17.10",
+    "dotenv": "16.4.7",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-playwright": "2.1.0",
+    "prettier": "3.4.2",
+    "typescript": "5.7.2",
+    "typescript-eslint": "8.18.1"
+  }
+}

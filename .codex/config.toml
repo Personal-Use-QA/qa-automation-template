@@ -1,0 +1,25 @@
+# Project MCP only; operator approval/sandbox policy is inherited.
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@{{PLAYWRIGHT_MCP_VERSION}}","--isolated","--output-dir","reports/explore/mcp","--timeout-action","15000"]
+disabled_tools = ["browser_run_code_unsafe"]
+
+[mcp_servers.playwright-mobile]
+command = "npx"
+args = ["@playwright/mcp@{{PLAYWRIGHT_MCP_VERSION}}","--isolated","--output-dir","reports/explore/mcp","--timeout-action","15000","--device","{{DEVICE_MOBILE}}"]
+disabled_tools = ["browser_run_code_unsafe"]
+
+[mcp_servers.playwright-mobile-webkit]
+command = "npx"
+args = ["@playwright/mcp@{{PLAYWRIGHT_MCP_VERSION}}","--isolated","--output-dir","reports/explore/mcp","--timeout-action","15000","--device","{{DEVICE_MOBILE_WEBKIT}}","--browser","webkit"]
+disabled_tools = ["browser_run_code_unsafe"]
+
+[mcp_servers.playwright-tablet]
+command = "npx"
+args = ["@playwright/mcp@{{PLAYWRIGHT_MCP_VERSION}}","--isolated","--output-dir","reports/explore/mcp","--timeout-action","15000","--device","{{DEVICE_TABLET}}"]
+disabled_tools = ["browser_run_code_unsafe"]
+
+[mcp_servers.playwright-tablet-webkit]
+command = "npx"
+args = ["@playwright/mcp@{{PLAYWRIGHT_MCP_VERSION}}","--isolated","--output-dir","reports/explore/mcp","--timeout-action","15000","--device","{{DEVICE_TABLET_WEBKIT}}","--browser","webkit"]
+disabled_tools = ["browser_run_code_unsafe"]

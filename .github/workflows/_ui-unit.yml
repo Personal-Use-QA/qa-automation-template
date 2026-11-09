@@ -1,0 +1,50 @@
+name: Reusable UI unit
+on:
+  workflow_call:
+    inputs:
+      unit:
+        type: string
+        required: true
+      browser:
+        type: string
+        required: true
+      grep:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: '{{RUNNER_LABEL}}'
+    environment: '{{GH_ENVIRONMENT}}'
+    timeout-minutes: 20
+    env:
+      BASE_URL_UI: ${{ vars.BASE_URL_UI }}
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      UNIT: ${{ inputs.unit }}
+      BROWSER: ${{ inputs.browser }}
+      GREP: ${{ inputs.grep }}
+      PLAYWRIGHT_JSON_OUTPUT_NAME: results/unit.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps "$BROWSER"
+      - run: npx playwright test "tests/ui/$UNIT.spec.ts" --project="ui-$BROWSER" --grep "$GREP"
+        timeout-minutes: 15
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report-ui-${{ inputs.unit }}-${{ inputs.browser }}
+          path: |
+            playwright-report/
+            results/
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failure-evidence-ui-${{ inputs.unit }}-${{ inputs.browser }}
+          path: test-results/

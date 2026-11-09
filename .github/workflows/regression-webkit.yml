@@ -1,0 +1,24 @@
+name: webkit regression
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: '{{CONCURRENCY_GROUP}}'
+  cancel-in-progress: false
+jobs:
+  ui:
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(vars.MAX_LANES || '{{MAX_LANES}}') }}
+      matrix:
+        # Biggest screen first; each UI spec must appear exactly once.
+        unit: [todo]
+    uses: ./.github/workflows/_ui-unit.yml
+    with:
+      unit: ${{ matrix.unit }}
+      browser: webkit
+      grep: '^(?!.*@sqli)(?!.*@xss)(?!.*@logout-revokes)(?!.*@journey)'
+    secrets: inherit

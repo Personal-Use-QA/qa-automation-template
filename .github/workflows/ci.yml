@@ -1,0 +1,57 @@
+name: PR gate
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: '{{CONCURRENCY_GROUP}}'
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: '{{RUNNER_LABEL}}'
+    environment: '{{GH_ENVIRONMENT}}'
+    timeout-minutes: 15
+    env:
+      BASE_URL_UI: ${{ vars.BASE_URL_UI }}
+      BASE_URL_API: ${{ vars.BASE_URL_API }}
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      PLAYWRIGHT_JSON_OUTPUT_NAME: results/sanity.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npx playwright test --list
+      - run: npm run tags:check
+      - run: npm run lanes:check
+      - run: npm run findings:check
+      - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+      - run: npm run docs:check -- "$BASE_SHA"
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:sanity -- --global-timeout=150000 --reporter=json
+        timeout-minutes: 4
+      - run: npm run sanity:gate -- --report results/sanity.json --expect 3
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: sanity-failure-evidence
+          path: |
+            test-results/
+            results/
+          if-no-files-found: warn

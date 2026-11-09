@@ -1,0 +1,63 @@
+name: On demand
+on:
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: Anchored Playwright grep
+        default: '^'
+        type: string
+      project:
+        description: Playwright project
+        default: ui-chromium
+        type: choice
+        options:
+          [
+            ui-chromium,
+            ui-firefox,
+            ui-webkit,
+            api,
+            mobile-chromium,
+            mobile-webkit,
+            tablet-chromium,
+            tablet-webkit,
+          ]
+      repeat_each:
+        description: Repetitions
+        default: '1'
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: '{{CONCURRENCY_GROUP}}'
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: '{{RUNNER_LABEL}}'
+    environment: '{{GH_ENVIRONMENT}}'
+    timeout-minutes: 30
+    env:
+      BASE_URL_UI: ${{ vars.BASE_URL_UI }}
+      BASE_URL_API: ${{ vars.BASE_URL_API }}
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      GREP: ${{ inputs.grep }}
+      PROJECT: ${{ inputs.project }}
+      REPEAT: ${{ inputs.repeat_each }}
+      PLAYWRIGHT_JSON_OUTPUT_NAME: results/on-demand.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test --project="$PROJECT" --grep "$GREP" --repeat-each="$REPEAT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: on-demand-report
+          path: |
+            playwright-report/
+            results/
+            test-results/

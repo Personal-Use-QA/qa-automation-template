@@ -1,0 +1,22 @@
+# Dependencies are restored from the lockfile.
+node_modules/
+# Local toolchain and caches are machine-specific.
+.tools/
+# Browser artifacts are generated.
+playwright-report/
+test-results*/
+results/
+reports/
+public/
+# Credentials and backups stay local.
+.env
+.env.*
+!.env.example
+# Logs and desktop metadata carry local state.
+*.log
+.DS_Store
+# Live profiles and tokens are not portable.
+.playwright-mcp/
+playwright/.auth/
+# Stray snapshots belong under reports.
+/*.yaml

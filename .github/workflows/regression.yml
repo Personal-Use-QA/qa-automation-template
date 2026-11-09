@@ -1,0 +1,47 @@
+name: chromium regression
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: '{{CONCURRENCY_GROUP}}'
+  cancel-in-progress: false
+jobs:
+  ui:
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(vars.MAX_LANES || '{{MAX_LANES}}') }}
+      matrix:
+        # Biggest screen first; each UI spec must appear exactly once.
+        unit: [todo]
+    uses: ./.github/workflows/_ui-unit.yml
+    with:
+      unit: ${{ matrix.unit }}
+      browser: chromium
+      grep: '^(?!.*@sqli)(?!.*@xss)(?!.*@logout-revokes)(?!.*@journey)'
+    secrets: inherit
+  api:
+    runs-on: '{{RUNNER_LABEL}}'
+    environment: '{{GH_ENVIRONMENT}}'
+    timeout-minutes: 10
+    env:
+      BASE_URL_API: ${{ vars.BASE_URL_API }}
+      PLAYWRIGHT_JSON_OUTPUT_NAME: results/api.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:api -- --grep '^(?!.*@sqli)(?!.*@xss)(?!.*@logout-revokes)(?!.*@journey)'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report-api
+          path: |
+            playwright-report/
+            results/
+            test-results/
